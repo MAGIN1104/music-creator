@@ -77,6 +77,7 @@ export default function WorshipSongs() {
       setUser(user);
       if (user) fetchSongs();
     });
+    return () => unsubscribe();
   }, []);
 
   const handleLogin = async () => {
@@ -90,8 +91,10 @@ export default function WorshipSongs() {
 
   const handleAddSong = async (e: React.FormEvent) => {
     e.preventDefault();
+    const formData = new FormData(e.currentTarget as HTMLFormElement);
+    const keySongInput = String(formData.get("keySong") ?? keySong);
     try {
-      await addDoc(collection(db, "musics"), { title, artist, keySong, content, url });
+      await addDoc(collection(db, "musics"), { title, artist, keySong: keySongInput, content, url });
       setSnackbar({ open: true, message: 'Canción agregada', severity: 'success' });
       setShowCreate(false);
       setTitle(""); setArtist(""); setKeySong(""); setContent(""); setUrl("");
@@ -114,11 +117,13 @@ export default function WorshipSongs() {
   const handleUpdateSong = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editId) return;
+    const formData = new FormData(e.currentTarget as HTMLFormElement);
+    const editKeySongInput = String(formData.get("editKeySong") ?? editKeySong);
     try {
       await updateDoc(doc(db, "musics", editId), {
         title: editTitle,
         artist: editArtist,
-        keySong: editKeySong,
+        keySong: editKeySongInput,
         content: editContent,
         url: editUrl
       });
@@ -184,7 +189,16 @@ export default function WorshipSongs() {
                   <Stack spacing={2}>
                     <TextField label="Título" value={title} onChange={e => setTitle(e.target.value)} required fullWidth InputProps={{ style: { background: '#fff', borderRadius: 8, fontSize: 18, minHeight: 56 } }} />
                     <TextField label="Artista" value={artist} onChange={e => setArtist(e.target.value)} required fullWidth InputProps={{ style: { background: '#fff', borderRadius: 8, fontSize: 18, minHeight: 56 } }} />
-                    <TextField label="Tonalidad" value={keySong} onChange={e => setKeySong(e.target.value)} required fullWidth InputProps={{ style: { background: '#fff', borderRadius: 8, fontSize: 18, minHeight: 56 } }} />
+                    <TextField
+                      name="keySong"
+                      label="Tonalidad"
+                      value={keySong}
+                      onChange={e => setKeySong(e.target.value)}
+                      required
+                      fullWidth
+                      inputProps={{ autoCapitalize: 'none', autoCorrect: 'off', spellCheck: 'false' }}
+                      InputProps={{ style: { background: '#fff', borderRadius: 8, fontSize: 18, minHeight: 56 } }}
+                    />
                     <TextField
                       label="Letra / Contenido"
                       value={content}
@@ -247,6 +261,7 @@ export default function WorshipSongs() {
                   columns={[
                     { field: 'title', headerName: 'Título', flex: 1, minWidth: 180 },
                     { field: 'artist', headerName: 'Artista', flex: 1, minWidth: 180 },
+                    { field: 'keySong', headerName: 'Tonalidad', minWidth: 120 },
                     {
                       field: 'actions',
                       headerName: 'Acciones',
@@ -317,7 +332,16 @@ export default function WorshipSongs() {
                     />
                     <TextField label="Título" value={editTitle} onChange={e => setEditTitle(e.target.value)} required fullWidth InputProps={{ style: { background: '#fff', borderRadius: 8, fontSize: 18, minHeight: 56 } }} />
                     <TextField label="Artista" value={editArtist} onChange={e => setEditArtist(e.target.value)} required fullWidth InputProps={{ style: { background: '#fff', borderRadius: 8, fontSize: 18, minHeight: 56 } }} />
-                    <TextField label="Tonalidad" value={editKeySong} onChange={e => setEditKeySong(e.target.value)} required fullWidth InputProps={{ style: { background: '#fff', borderRadius: 8, fontSize: 18, minHeight: 56 } }} />
+                    <TextField
+                      name="editKeySong"
+                      label="Tonalidad"
+                      value={editKeySong}
+                      onChange={e => setEditKeySong(e.target.value)}
+                      required
+                      fullWidth
+                      inputProps={{ autoCapitalize: 'none', autoCorrect: 'off', spellCheck: 'false' }}
+                      InputProps={{ style: { background: '#fff', borderRadius: 8, fontSize: 18, minHeight: 56 } }}
+                    />
                     <TextField label="URL (YouTube)" value={editUrl} onChange={e => setEditUrl(e.target.value)} fullWidth InputProps={{ style: { background: '#fff', borderRadius: 8, fontSize: 16, minHeight: 56 } }} />
                   </Stack>
                 </DialogContent>
